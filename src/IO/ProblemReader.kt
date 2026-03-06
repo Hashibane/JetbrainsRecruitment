@@ -16,6 +16,10 @@ fun parseProblem(scanner: Scanner): ProblemRepresentation {
         val s = checkedNextInt()
         val t = checkedNextInt()
 
+        if (s < 0 || t < 0) {
+            throw IllegalArgumentException("Both s and t must be non-negative. Passed s: $s and t: $t")
+        }
+
         val builder = ProblemBuilder(s)
 
         repeat(s) {

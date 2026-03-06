@@ -2,6 +2,11 @@ package problem
 
 private const val DEFAULT_INITIAL_CAPACITY = 10
 
+fun buildProblem(body: ProblemBuilder.() -> ProblemRepresentation): ProblemRepresentation {
+    val builder = ProblemBuilder()
+    return builder.body()
+}
+
 class ProblemBuilder(initialCapacity: Int = DEFAULT_INITIAL_CAPACITY) {
     private val stations = LinkedHashMap<Int, StationBuilder>(initialCapacity)
 
@@ -18,5 +23,10 @@ class ProblemBuilder(initialCapacity: Int = DEFAULT_INITIAL_CAPACITY) {
     }
 
     fun spawn(startStation: Int): ProblemRepresentation =
-        ProblemRepresentation(startStation, stations.mapValues { it.value.spawn() })
+        if (stations[startStation] != null)
+            ProblemRepresentation(startStation, stations.mapValues { it.value.spawn() })
+        else
+            throw IllegalArgumentException("The starting station does not exist in the given context")
+
+
 }
