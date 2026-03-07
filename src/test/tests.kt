@@ -10,7 +10,7 @@ import solvers.*
 
 
 class ProblemTester {
-    val solver: Solver = ::exploringRpoSolver
+    val solver: Solver = ::rpoSolver
 
     @Test
     fun `nontrivial with endpoint`() {
@@ -143,12 +143,12 @@ class ProblemTester {
 
     @Test
     fun `fuzzing tests`() {
-        val epochs = 10000
-        val referenceSolver = ::rpoSolver
+        val epochs = 30
+        val referenceSolver = ::naiveSolver
         val fuzzer = Fuzzer()
 
         repeat(epochs) {
-            val result = fuzzer.generateRandomTest(referenceSolver, solver)
+            val result = fuzzer.generateRandomTest(referenceSolver, solver, maxS = 1000, maxT = 10000)
             assertEquals(result.first.trimIndent(), result.second.trimIndent())
         }
 

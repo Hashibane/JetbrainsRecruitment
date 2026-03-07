@@ -5,11 +5,11 @@ import problem.Station
 
 typealias Solver = (ProblemRepresentation) -> List<Station>
 
-private const val INITIAL_BUFFFER_CAPACITY = 128
+private const val INITIAL_BUFFER_CAPACITY = 128
 
 fun naiveSolver(representation: ProblemRepresentation): List<Station> {
     with (representation) {
-        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFER_CAPACITY)
         nodeQueue.add(startStation)
 
         while (!nodeQueue.isEmpty()) {
@@ -31,10 +31,10 @@ fun naiveSolver(representation: ProblemRepresentation): List<Station> {
 
 fun exploringSolver(representation: ProblemRepresentation): List<Station> {
     with (representation) {
-        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFER_CAPACITY)
         nodeQueue.add(startStation)
 
-        val priorityQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        val priorityQueue = ArrayDeque<Int>(INITIAL_BUFFER_CAPACITY)
         var priorityUsed: Boolean
 
         while (nodeQueue.isNotEmpty() || priorityQueue.isNotEmpty()) {
@@ -75,34 +75,67 @@ fun exploringSolver(representation: ProblemRepresentation): List<Station> {
 }
 
 fun rpoSolver(representation: ProblemRepresentation): List<Station> {
+    fun relaxGraph(stations: Map<Int, Station>, ordering: ArrayDeque<Int>) {
+        var isRelaxed: Boolean
+
+        do {
+            isRelaxed = true
+            for (i in ordering) {
+                val currentStation = stations[i]!!
+                val outgoingTypes = currentStation.outgoingTypes
+
+                for (station in currentStation.connections) {
+                    val neighbour = stations[station]!!
+                    if (neighbour.receiveCargo(outgoingTypes)) {
+                        isRelaxed = false
+                    }
+                }
+            }
+        } while (!isRelaxed)
+    }
+
     with (representation) {
-        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFER_CAPACITY)
         nodeQueue.add(startStation)
+
+        val rpoOrdering = ArrayDeque<Int>(representation.stations.size)
 
         while (!nodeQueue.isEmpty()) {
             val node = nodeQueue.first()
-            nodeQueue.removeFirst()
-
             val currentStation = stations[node]!!
-            val outgoingTypes = currentStation.outgoingTypes
-            for (station in currentStation.connections) {
-                if (stations[station]!!.receiveCargo(outgoingTypes)) {
-                    nodeQueue.addFirst(station)
-                }
+            currentStation.visited = true
 
+            var hasUnvisitedChild = false
+            for (i in currentStation.cachedIndex..<currentStation.connections.size) {
+                val station = currentStation.connections[i]
+                val neighbor = stations[station]!!
+                if (!neighbor.visited) {
+                    currentStation.cachedIndex = i + 1
+                    neighbor.visited = true
+                    hasUnvisitedChild = true
+                    nodeQueue.addFirst(station)
+                    break
+                }
+            }
+
+            if (!hasUnvisitedChild) {
+                nodeQueue.removeFirst()
+                rpoOrdering.addFirst(node)
             }
         }
+
+        relaxGraph(stations, rpoOrdering)
 
         return stations.values.toList()
     }
 }
 
-fun exploringRpoSolver(representation: ProblemRepresentation): List<Station> {
+fun exploringWorklistSolver(representation: ProblemRepresentation): List<Station> {
     with (representation) {
-        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFER_CAPACITY)
         nodeQueue.add(startStation)
 
-        val priorityQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        val priorityQueue = ArrayDeque<Int>(INITIAL_BUFFER_CAPACITY)
 
         while (nodeQueue.isNotEmpty() || priorityQueue.isNotEmpty()) {
             val node = if (priorityQueue.isEmpty()) {

@@ -1,6 +1,6 @@
 package problem
 
-class Station(val id: Int, val consumes: Int, val produces: Int, val connections: List<Int>, var visited: Boolean = false) {
+class Station(val id: Int, val consumes: Int, val produces: Int, val connections: List<Int>, var visited: Boolean = false, var cachedIndex: Int = 0) {
     var incomingTypes: Set<Int> = emptySet()
         private set
 
