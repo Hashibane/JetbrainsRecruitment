@@ -5,9 +5,12 @@ import problem.Station
 
 typealias Solver = (ProblemRepresentation) -> List<Station>
 
+private const val INITIAL_BUFFFER_CAPACITY = 128
+
 fun naiveSolver(representation: ProblemRepresentation): List<Station> {
     with (representation) {
-        val nodeQueue = ArrayDeque(listOf(startStation))
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        nodeQueue.add(startStation)
 
         while (!nodeQueue.isEmpty()) {
             val node = nodeQueue.first()
@@ -28,8 +31,10 @@ fun naiveSolver(representation: ProblemRepresentation): List<Station> {
 
 fun exploringSolver(representation: ProblemRepresentation): List<Station> {
     with (representation) {
-        val nodeQueue = ArrayDeque(listOf(startStation))
-        val priorityQueue = ArrayDeque<Int>()
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        nodeQueue.add(startStation)
+
+        val priorityQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
         var priorityUsed: Boolean
 
         while (nodeQueue.isNotEmpty() || priorityQueue.isNotEmpty()) {
@@ -63,6 +68,63 @@ fun exploringSolver(representation: ProblemRepresentation): List<Station> {
             }
 
 
+        }
+
+        return stations.values.toList()
+    }
+}
+
+fun rpoSolver(representation: ProblemRepresentation): List<Station> {
+    with (representation) {
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        nodeQueue.add(startStation)
+
+        while (!nodeQueue.isEmpty()) {
+            val node = nodeQueue.first()
+            nodeQueue.removeFirst()
+
+            val currentStation = stations[node]!!
+            val outgoingTypes = currentStation.outgoingTypes
+            for (station in currentStation.connections) {
+                if (stations[station]!!.receiveCargo(outgoingTypes)) {
+                    nodeQueue.addFirst(station)
+                }
+
+            }
+        }
+
+        return stations.values.toList()
+    }
+}
+
+fun exploringRpoSolver(representation: ProblemRepresentation): List<Station> {
+    with (representation) {
+        val nodeQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+        nodeQueue.add(startStation)
+
+        val priorityQueue = ArrayDeque<Int>(INITIAL_BUFFFER_CAPACITY)
+
+        while (nodeQueue.isNotEmpty() || priorityQueue.isNotEmpty()) {
+            val node = if (priorityQueue.isEmpty()) {
+                nodeQueue.removeFirst()
+            } else {
+                priorityQueue.removeFirst()
+            }
+
+            val currentStation = stations[node]!!
+            currentStation.visited = true
+
+            val outgoingTypes = currentStation.outgoingTypes
+            for (station in currentStation.connections) {
+                val nextStation = stations[station]!!
+                if (nextStation.receiveCargo(outgoingTypes)) {
+                    if (!nextStation.visited)
+                        priorityQueue.addFirst(nextStation.id)
+                    else
+                        nodeQueue.addFirst(nextStation.id)
+                }
+
+            }
         }
 
         return stations.values.toList()

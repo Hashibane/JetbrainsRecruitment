@@ -1,5 +1,6 @@
 package test
 
+import problem.ProblemRepresentation
 import problem.buildProblem
 import solvers.Solver
 import kotlin.math.min
@@ -23,38 +24,43 @@ class Fuzzer {
         private set
 
     fun generateRandomTest(referenceSolver: Solver, comparedSolver: Solver, maxS: Int = 100, maxT: Int = 1000): Pair<TestResult, TestResult> {
-        with (Random) {
+        val runSeed = Random.nextInt()
+        with (Random(runSeed)) {
+
             val s = nextInt(2, maxS)
             val t = nextInt(2, maxT)
             val minCargo = nextInt(s - 1)
 
+            val problem: () -> ProblemRepresentation = {
+                with (Random(runSeed)) {
+                    buildProblem {
+                        for (i in 1..s) {
+                            val cUnload = nextInt(minCargo, s)
+                            val cLoad = nextInt(minCargo, s)
+
+                            station(i, cUnload, cLoad)
+                        }
+
+                        repeat(t) {
+                            val from = nextInt(s)
+                            val to = nextInt(s)
+                            track(from, to)
+                        }
+
+                        spawn(nextInt(s))
+                    }
+                }
+            }
 
             try {
-                val problem = buildProblem {
-                    for (i in 1..s) {
-                        val cUnload = nextInt(minCargo, s)
-                        val cLoad = nextInt(minCargo, s)
-
-                        station(i, cUnload, cLoad)
-                    }
-
-                    repeat(t) {
-                        val from = nextInt(s)
-                        val to = nextInt(s)
-                        track(from, to)
-                    }
-
-                    spawn(nextInt( s))
-                }
-
                 var referenceSolution = ""
                 val refTime = measureNanoTime {
-                    referenceSolution = referenceSolver(problem).joinToString(separator = "\n")
+                    referenceSolution = referenceSolver(problem()).joinToString(separator = "\n")
                 }
 
                 var comparedSolution = ""
                 val compTime = measureNanoTime {
-                    comparedSolution = comparedSolver(problem).joinToString(separator = "\n")
+                    comparedSolution = comparedSolver(problem()).joinToString(separator = "\n")
                 }
 
                 totalReferenceTimeNanos += refTime
@@ -65,10 +71,9 @@ class Fuzzer {
             } catch (_: IllegalArgumentException) {
                 return Pair("illegal spawn", "illegal spawn")
             }
-
-
-
         }
+
+
     }
 
     fun printPerformanceReport() {

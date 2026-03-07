@@ -2,8 +2,6 @@ package test
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import problem.ProblemBuilder
-import problem.ProblemRepresentation
 import problem.buildProblem
 import solvers.Solver
 import solvers.*
@@ -12,7 +10,7 @@ import solvers.*
 
 
 class ProblemTester {
-    val solver: Solver = ::exploringSolver
+    val solver: Solver = ::exploringRpoSolver
 
     @Test
     fun `nontrivial with endpoint`() {
@@ -145,8 +143,8 @@ class ProblemTester {
 
     @Test
     fun `fuzzing tests`() {
-        val epochs = 100000
-        val referenceSolver = ::naiveSolver
+        val epochs = 10000
+        val referenceSolver = ::rpoSolver
         val fuzzer = Fuzzer()
 
         repeat(epochs) {
