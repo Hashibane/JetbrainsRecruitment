@@ -1,6 +1,6 @@
 package problem
 
-private const val INITIAL_BUFFER_CAPACITY = 64
+private const val INITIAL_BUFFER_CAPACITY = 128
 
 class StationBuilder(private val id: Int, private val consumes: Int, private val produces: Int) {
     private val connections = ArrayList<Int>(INITIAL_BUFFER_CAPACITY)

@@ -1,13 +1,13 @@
 package problem
 
-private const val DEFAULT_INITIAL_CAPACITY = 10
+private const val INITIAL_BUFFER_CAPACITY = 128
 
 fun buildProblem(body: ProblemBuilder.() -> ProblemRepresentation): ProblemRepresentation {
     val builder = ProblemBuilder()
     return builder.body()
 }
 
-class ProblemBuilder(initialCapacity: Int = DEFAULT_INITIAL_CAPACITY) {
+class ProblemBuilder(initialCapacity: Int = INITIAL_BUFFER_CAPACITY) {
     private val stations = LinkedHashMap<Int, StationBuilder>(initialCapacity)
 
     fun station(id: Int, consumes: Int, produces: Int) {

@@ -58,7 +58,8 @@ to avoid bloating the code for a strictly algorithmic assessment.
 
 * **IO formatting:** The task did not specify an output format or 
 a programming language. I chose Kotlin and formatted the output  
-using `Station.toString()`, with sorted cargo IDs for predictability of results.
+using `Station.toString()`, with sorted cargo IDs and station IDs 
+for predictability of results.
 I chose to format outputs in the solution as a new line for every station:
 `station_id cargo1 cargo2 ... cargoN`
 In this repo I there is a `->` between `station_id` and `cargoX` for readability and

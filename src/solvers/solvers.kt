@@ -74,6 +74,7 @@ fun exploringSolver(representation: ProblemRepresentation): List<Station> {
     }
 }
 
+// This is the one that the final solution is using
 fun rpoSolver(representation: ProblemRepresentation): List<Station> {
     fun relaxGraph(stations: Map<Int, Station>, ordering: ArrayDeque<Int>) {
         var isRelaxed: Boolean
